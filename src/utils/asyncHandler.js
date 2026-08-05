@@ -1,7 +1,7 @@
 // This is a Promise based function that will handle the async await and try catch for us. 
 
 const asyncHandler = (requestHandler) => {
-    (req, res, next) => {
+    return (req, res, next) => {
         Promise.resolve(requestHandler(req, res, next)).catch((error) => next(error))
     }
 }
