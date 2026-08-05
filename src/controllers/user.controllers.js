@@ -1,8 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {ApiError, APIError} from "../utils/ApiError.js"
+import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.models.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
-import { emit } from "cluster";
+//import { emit } from "cluster";
 import { ApiResponse } from  "../utils/ApiResponse.js"
 
 
@@ -19,8 +19,15 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     // step 1:
-    const {fullName, email, username, password} = req.body
-    console.log("email:", email);
+    const {fullName, email, username, password} = req.body;
+    console.log("Body:", req.body);
+
+    console.log({
+        fullName,
+        email,
+        username,
+        password,
+    });
 
     // Step 2:
     // if(fullName === "") {
@@ -35,7 +42,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Step 3:
 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -48,8 +55,8 @@ const registerUser = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.avatar[0]?.path
     const coverImageLocalPath = req.files?.coverImage[0]?.path
 
-    if(avatarLocalPath) {
-        throw new APIError(400, "Avatar file is required")
+    if(!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required")
     }
 
     // Step 5 :
@@ -58,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if( !avatar) {
-        throw new APIError(400, "Avatar file is required")
+        throw new ApiError(400, "Avatar file is required")
     }
 
     // Step6:
@@ -72,9 +79,9 @@ const registerUser = asyncHandler(async (req, res) => {
         username: username.toLowerCase()
     })
 
-    const createdUser = await User.findById(user._id)/Selection(
-        "-password -refreshToken"   
-    )
+   const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+);
 
     if(!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the User")
