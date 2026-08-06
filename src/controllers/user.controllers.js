@@ -20,7 +20,10 @@ const generateAccessAndRefreshTokens = async(userId) => {
         return {accessToken, refreshToken}
 
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating refresh and access token")
+        throw new ApiError(
+            500,
+            "Something went wrong while generating refresh and access token"
+        )
     }
 }
 
@@ -155,7 +158,7 @@ const loginUser = asyncHandler(async (req, res) =>{
 
     const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
 
-    const loggedInUser = await user.findById(user._id).
+    const loggedInUser = await User.findById(user._id).
     select("-password -refreshToken")
 
     const options = {
